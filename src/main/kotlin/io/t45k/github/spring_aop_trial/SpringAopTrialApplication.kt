@@ -5,9 +5,6 @@ import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Before
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import org.springframework.data.mapping.model.DefaultSpELExpressionEvaluator
-import org.springframework.data.mapping.model.SpELExpressionEvaluator
-import org.springframework.data.repository.query.Param
 import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
@@ -42,7 +39,9 @@ class SampleService {
     }
 }
 
-data class SampleInput(val now: LocalDateTime)
+data class SampleInput(val now: LocalDateTime) : SampleInterface
+
+interface SampleInterface
 
 annotation class SampleAnnotation(val spel: String)
 
@@ -56,6 +55,12 @@ class SampleAdvice {
         val now = parser.parseExpression(sampleAnnotation.spel)
             .getValue(joinPoint.args[0])
             as LocalDateTime
+        println(now)
+    }
+
+    @Before("execution(* *(SampleInput, ..)) && args(input, ..)")
+    fun exec(joinPoint: JoinPoint, input: SampleInput) {
+        val now = input.now
         println(now)
     }
 }
